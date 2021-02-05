@@ -1,0 +1,47 @@
+name: Deploy Example
+on:
+  push:
+    branches: [master]
+jobs:
+  deploy:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup SSH Keys and deploy new version on the server
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          echo "--------- Adding SSH keys and configuring them"
+          mkdir -p ~/.ssh
+
+          echo "------------------------ Parse variables to files"
+          cat <<< "${{ secrets.DEPLOY_KEY_PRODUCTION }}" > ~/.ssh/id_rsa
+          chmod -R 600 ~/.ssh/id_rsa*
+          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+          chmod -R 600 ~/.ssh/id_rsa*
+          sudo groupadd devs
+          sudo usermod -aG devs `whoami`  
+          sudo chown :devs -R .
+
+          echo "------------------------ Add the identities"
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan -p 22 <server domain >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add ~/.ssh/id_rsa
+
+          echo "---------- Deploying to production servers"
+          echo "----------- Create dir on server"
+          ssh ci@server.example.com -p 22 "mkdir -p $ROOT_FOLDER $RELEASE_FOLDER/release_$GITHUB_SHA/"
+          scp -P 22 -r ./* ci@server.example.com:$RELEASE_FOLDER/release_$GITHUB_SHA/
+
+          echo "----------- Deploy on server"
+          ssh ci@server.example.com -p 22 "bash -s" < \
+          ./scripts/deploy-website.sh /data/www/example.com release_$GITHUB_SHA
+    env:
+      ROOT_FOLDER: /data/www/example.com
+      RELEASE_FOLDER: /data/www/example.com/releases

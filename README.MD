@@ -69,3 +69,15 @@ Copy the outputs and add it to your secrets in the GitHub repo, name the variabl
 # Notes
 
 This procedure is tested on Linux only, no guarantee is given for any other OS'es.
+
+## Permissions on added authorized keys
+
+If permissions cause the system not to recognize the added key as valid, run the following comamnds logged in as the CI user:
+
+```
+cd ~
+chmod 700 .ssh
+sudo chmod 640 .ssh/authorized_keys
+sudo chown $USER .ssh
+sudo chown $USER .ssh/authorized_keys
+```

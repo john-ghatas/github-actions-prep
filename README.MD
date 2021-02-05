@@ -11,7 +11,15 @@ The first step to automatically deploy with GitHub actions to setup the CI user 
 To generate a key to be used in the pipeline, run the following command:
 
 ```
-cd ~/.ssh && ssh-keygen
+ssh-keygen
+```
+
+If you are going to save this key somewhere it is recommended to run this command in a designated folder, for example:
+
+```
+mkdir -p ~/Documents/Keys/
+cd ~/Documents/Keys/
+ssh-keygen -f super_secret
 ```
 
 ## Public key
@@ -20,9 +28,17 @@ Obtain the public key through the following command, and copy it to your clipboa
 
 ```
 cat ~/.ssh/id_rsa.pub
+OR
+cat ~/Documents/Keys/super_secret.pub
 ```
 
 After obtaining the public key, log on to the ci user on the dedicated server and add the public key to the trusted keys. This can be done in 2 ways:
+
+**Before doing this log on to the CI user:**
+
+```
+sudo su ci
+```
 
 **You echo it to a file:**
 
@@ -40,8 +56,12 @@ vim ~/.ssh/authorized_keys
 
 After adding the public key to the trusted keys on the ci user, now you need to add your private key to the secrets in the GitHub repo. Obtain the private key by printing the key you generated with the following command, make sure you are in the correct directory and machine when doing this:
 
+**Run this command on the machine where you generated the key**
+
 ```
 cat ~/.ssh/id_rsa
+OR
+cat ~/Documents/Keys/super_secret
 ```
 
 Copy the outputs and add it to your secrets in the GitHub repo, name the variable accordingly!

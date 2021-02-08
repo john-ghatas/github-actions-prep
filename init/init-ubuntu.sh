@@ -21,3 +21,5 @@ sudo groupadd devs # Create a group to assign the permissions to
 sudo useradd -G devs,sudo,docker -m ci # Add the CI user on the machine and assign the groups
 sudo mkdir -p /data/www/ # Any other folder path is fine too!
 sudo chown ci:devs -R /data # Assign the create folder to the ci user and the devs group
+sudo chgrp -R devs /data/www/
+sudo chmod -R 2775 /data/www/

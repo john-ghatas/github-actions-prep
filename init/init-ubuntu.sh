@@ -23,3 +23,8 @@ sudo mkdir -p /data/www/ # Any other folder path is fine too!
 sudo chown ci:devs -R /data # Assign the create folder to the ci user and the devs group
 sudo chgrp -R devs /data/www/
 sudo chmod -R 2775 /data/www/
+
+# Install MariaDB
+sudo apt install mariadb-server
+echo "===== Start setting up users for your database server"
+sudo mysql -u root 

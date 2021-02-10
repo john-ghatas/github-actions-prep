@@ -16,27 +16,36 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          echo "--------- Adding SSH keys and configuring them"
+          echo "--------- Adding SSH keys and configuring the target host"
           mkdir -p ~/.ssh
+          echo -e "HashKnownHosts no
+          Host *
+            ForwardAgent yes
+            ServerAliveInterval 60
+            ServerAliveCountMax 40
+
+          Host target
+            User ci
+            HostName host_name 
+            Port 22" >> ~/.ssh/config
+
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan -p 22 host_name >> ~/.ssh/known_hosts
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.DEPLOY_KEY_PRODUCTION }}"
 
           echo "------------------------ Parse variables to files"
           sudo groupadd devs
           sudo usermod -aG devs `whoami`  
           sudo chown :devs -R .
 
-          echo "------------------------ Add the identities"
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-keyscan -p 22 <server domain >> ~/.ssh/known_hosts
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.DEPLOY_KEY_PRODUCTION }}"
-
           echo "---------- Deploying to production servers"
           echo "----------- Create dir on server"
-          ssh ci@server.example.com -p 22 "mkdir -p $ROOT_FOLDER $RELEASE_FOLDER/release_$GITHUB_SHA/"
-          scp -P 22 -r ./* ci@server.example.com:$RELEASE_FOLDER/release_$GITHUB_SHA/
+          ssh target "mkdir -p $ROOT_FOLDER $RELEASE_FOLDER/release_$GITHUB_SHA/"
+          scp -r ./* target:$RELEASE_FOLDER/release_$GITHUB_SHA/
 
           echo "----------- Deploy on server"
-          ssh ci@server.example.com -p 22 "bash -s" < \
+          ssh target "bash -s" < \
           ./scripts/deploy-website.sh /data/www/example.com release_$GITHUB_SHA
     env:
       ROOT_FOLDER: /data/www/example.com

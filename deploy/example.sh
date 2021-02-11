@@ -5,7 +5,8 @@ WEBSITE_LOCATION=$RELEASES_FOLDER/$2
 
 set_permissions() {
     cd $ROOT_LOCATION
-    chown -R :devs $ROOT_LOCATION/
+    chown -R :devs $ROOT_LOCATION/ > /dev/null 2>&1
+    chmod -R 2775 $ROOT_LOCATION/ > /dev/null 2>&1
 }
 
 echo "========== Setting permissions on $ROOT_LOCATION"

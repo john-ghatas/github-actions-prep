@@ -2,8 +2,7 @@
 
 # Install required packages and run updates
 sudo apt update && sudo apt dist-upgrade -y
-sudo apt install nginx docker.io python3 python3-pip git -y
-sudo ln -snf /usr/bin/pip3 /usr/bin/pip
+sudo apt install nginx docker.io python3 python3-pip git python python-pip -y
 
 # Install Docker-Compose
 sudo pip install docker-compose

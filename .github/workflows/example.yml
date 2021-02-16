@@ -23,14 +23,13 @@ jobs:
             ForwardAgent yes
             ServerAliveInterval 60
             ServerAliveCountMax 40
-
           Host target
             User ci
-            HostName host_name 
+            HostName "${{ secrets.DEPLOY_SERVER }}" 
             Port 22" >> ~/.ssh/config
-
+            
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-keyscan -p 22 host_name >> ~/.ssh/known_hosts
+          ssh-keyscan "${{ secrets.DEPLOY_SERVER }}" >> ~/.ssh/known_hosts
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.DEPLOY_KEY_PRODUCTION }}"
 

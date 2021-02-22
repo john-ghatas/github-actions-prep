@@ -23,13 +23,12 @@ jobs:
             ForwardAgent yes
             ServerAliveInterval 60
             ServerAliveCountMax 40
+            StrictHostKeyChecking no
           Host target
             User ci
             HostName "${{ secrets.DEPLOY_SERVER }}" 
             Port 22" >> ~/.ssh/config
             
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-keyscan "${{ secrets.DEPLOY_SERVER }}" >> ~/.ssh/known_hosts
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.DEPLOY_KEY_PRODUCTION }}"
 
